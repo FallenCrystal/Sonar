@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package xyz.jonesdev.sonar.common.subcommand.impl;
+package xyz.jonesdev.sonar.common.subcommands;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -38,7 +38,6 @@ import static xyz.jonesdev.sonar.api.jvm.JVMProcessInformation.*;
 // the Sonar contributors to fix issues more quickly
 @SubcommandInfo(
   name = "dump",
-  description = "Print developer information",
   onlyConsole = true
 )
 public final class DumpCommand extends Subcommand {
@@ -50,9 +49,10 @@ public final class DumpCommand extends Subcommand {
   protected void execute(final @NotNull CommandInvocation invocation) {
     final var mappings = new WeakHashMap<String, Object>();
     mappings.put("sonar", new Dump.Sonar(
-      Sonar.get().getVersion().getFull(),
+      Sonar.get().getVersion().getFormatted(),
       Sonar.get().getPlatform(),
-      Sonar.get().getVersion().isOnMainBranch()
+      Sonar.get().getVersion().getGitBranch(),
+      Sonar.get().getVersion().getGitCommit()
     ));
     mappings.put("runtime", new Dump.Runtime(
       getVirtualCores(),
@@ -72,7 +72,8 @@ public final class DumpCommand extends Subcommand {
       formatMemory(getFreeMemory()),
       formatMemory(getUsedMemory())
     ));
-    Sonar.get().getLogger().info("Generated dump: {}", GSON.toJson(mappings));
+    Sonar.get().getLogger().info(Sonar.get().getConfig().getMessagesConfig().getString("commands.dump.log")
+      .replace("<dumped-json-data>", GSON.toJson(mappings)));
   }
 
   @SuppressWarnings("unused")
@@ -82,7 +83,8 @@ public final class DumpCommand extends Subcommand {
     private static final class Sonar {
       private final String version;
       private final SonarPlatform platform;
-      private final boolean isOnMainBranch;
+      private final String gitBranch;
+      private final String gitCommit;
     }
 
     @RequiredArgsConstructor
