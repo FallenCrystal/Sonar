@@ -18,6 +18,7 @@
 package xyz.jonesdev.sonar.bukkit.listener;
 
 import io.netty.channel.Channel;
+import lombok.Getter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -41,7 +42,9 @@ public final class BukkitJoinListener implements Listener {
   private static MethodHandle _listenerField;
   private static MethodHandle _networkManagerField;
   private static MethodHandle _channelField;
-
+  @Getter
+  private static Class<?> networkManagerClass;
+  @Getter
   private static boolean initialized;
 
   static {
@@ -57,6 +60,7 @@ public final class BukkitJoinListener implements Listener {
       _handleMethod = MethodHandles.lookup().unreflect(handleMethod);
       _listenerField = MethodHandles.lookup().unreflectGetter(listenerField);
       _networkManagerField = MethodHandles.lookup().unreflectGetter(networkManagerField);
+      networkManagerClass = networkManagerField.getType();
       _channelField = MethodHandles.lookup().unreflectGetter(channelField);
       initialized = true;
     } catch (Exception exception) {

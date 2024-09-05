@@ -18,11 +18,15 @@
 package xyz.jonesdev.sonar.bukkit.fallback;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
+import lombok.val;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.jonesdev.sonar.api.fallback.protocol.ProtocolVersion;
+import xyz.jonesdev.sonar.bukkit.listener.BukkitJoinListener;
 import xyz.jonesdev.sonar.common.fallback.FallbackInboundHandlerAdapter;
 import xyz.jonesdev.sonar.common.fallback.protocol.FallbackPacket;
 import xyz.jonesdev.sonar.common.fallback.protocol.FallbackPacketRegistry;
@@ -30,7 +34,11 @@ import xyz.jonesdev.sonar.common.fallback.protocol.packets.handshake.HandshakePa
 import xyz.jonesdev.sonar.common.fallback.protocol.packets.login.LoginStartPacket;
 import xyz.jonesdev.sonar.common.util.exception.QuietDecoderException;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Map;
 import java.util.Objects;
 
 import static xyz.jonesdev.sonar.api.fallback.FallbackPipelines.FALLBACK_INBOUND_HANDLER;
@@ -40,6 +48,9 @@ import static xyz.jonesdev.sonar.common.util.ProtocolUtil.DEBUG;
 import static xyz.jonesdev.sonar.common.util.ProtocolUtil.readVarInt;
 
 final class FallbackBukkitInboundHandler extends FallbackInboundHandlerAdapter {
+
+  private static String networkManagerName;
+  private static MethodHandle networkManagerAddress;
 
   FallbackBukkitInboundHandler() {
     updateRegistry(FallbackPacketRegistry.HANDSHAKE, DEFAULT_PROTOCOL_VERSION);
@@ -60,6 +71,33 @@ final class FallbackBukkitInboundHandler extends FallbackInboundHandlerAdapter {
   public void updateRegistry(final @NotNull FallbackPacketRegistry registry,
                              final @NotNull ProtocolVersion protocolVersion) {
     this.registry = registry.getProtocolRegistry(SERVERBOUND, protocolVersion);
+  }
+
+  private @NotNull InetSocketAddress getAddress(final @NotNull Channel channel) {
+    val remoteAddress = channel.remoteAddress();
+    try {
+      @Nullable ChannelHandler networkManager;
+      if (networkManagerName == null) {
+        if (!BukkitJoinListener.isInitialized()) return (InetSocketAddress) remoteAddress;
+        for (Map.Entry<String, ChannelHandler> entry : channel.pipeline()) {
+          if (BukkitJoinListener.getNetworkManagerClass().isAssignableFrom(entry.getValue().getClass())) {
+            networkManagerName = entry.getKey();
+            networkManager = entry.getValue();
+            val f = FallbackBukkitInjector.getFieldAt(networkManager.getClass(), SocketAddress.class, 0);
+            f.setAccessible(true);
+            networkManagerAddress = MethodHandles.publicLookup().unreflectGetter(f);
+          }
+        }
+      } else {
+        networkManager = channel.pipeline().get(networkManagerName);
+        if (networkManager == null) {
+          return (InetSocketAddress) remoteAddress;
+        }
+        return (InetSocketAddress) networkManagerAddress.invoke(networkManager);
+      }
+    } catch (Throwable ignore) {
+    }
+    return (InetSocketAddress) remoteAddress;
   }
 
   @Override
@@ -128,7 +166,7 @@ final class FallbackBukkitInboundHandler extends FallbackInboundHandlerAdapter {
         }
       } else if (packet instanceof LoginStartPacket) {
         final LoginStartPacket loginStart = (LoginStartPacket) packet;
-        final InetSocketAddress socketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+        final InetSocketAddress socketAddress = getAddress(ctx.channel());
         // We've done our job - deject this pipeline
         ctx.pipeline().remove(this);
         // Let Sonar process the login packet
