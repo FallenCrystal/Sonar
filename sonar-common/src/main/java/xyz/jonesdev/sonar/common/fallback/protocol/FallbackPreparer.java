@@ -34,12 +34,12 @@ import xyz.jonesdev.sonar.common.fallback.protocol.packets.login.LoginSuccessPac
 import xyz.jonesdev.sonar.common.fallback.protocol.packets.play.*;
 import xyz.jonesdev.sonar.common.util.ComponentHolder;
 
-import java.security.SecureRandom;
+import java.util.Random;
 import java.util.UUID;
 
 @UtilityClass
 public class FallbackPreparer {
-  private final SecureRandom RANDOM = new SecureRandom();
+  private final Random RANDOM = new Random();
   // LoginSuccess
   public FallbackPacket loginSuccess;
   // Abilities
@@ -66,9 +66,6 @@ public class FallbackPreparer {
   public FallbackPacket joinGame;
   // Update Section Blocks
   public FallbackPacket updateSectionBlocks;
-  // Player Info
-  public final FallbackPacket PLAYER_INFO = new FallbackPacketSnapshot(new PlayerInfoPacket(
-    "", new UUID(1L, 1L), 2));
   // Default Spawn Position
   public FallbackPacket defaultSpawnPosition;
   // Spawn Position
@@ -96,7 +93,7 @@ public class FallbackPreparer {
   public final int BLOCKS_PER_ROW = 8; // 8 * 8 = 64 (protocol maximum)
   public final int SPAWN_X_POSITION = 16 / 2; // middle of the chunk
   public final int SPAWN_Z_POSITION = 16 / 2; // middle of the chunk
-  public final int DEFAULT_Y_COLLIDE_POSITION = 255; // 255 is the maximum Y position allowed
+  public final int DEFAULT_Y_COLLIDE_POSITION = 155 + RANDOM.nextInt(101); // 255 is the maximum Y position
   public final int IN_AIR_Y_POSITION = 1337;
 
   // CAPTCHA position
@@ -106,7 +103,6 @@ public class FallbackPreparer {
   // Platform
   public BlockType blockType;
   public int maxMovementTick, dynamicSpawnYPosition;
-  public double[] preparedCachedYMotions;
   public double maxFallDistance;
 
   // XP packets
@@ -119,25 +115,24 @@ public class FallbackPreparer {
     FallbackPacketRegistry.values();
 
     // Prepare LoginSuccess packet
-    loginSuccess = new FallbackPacketSnapshot(new LoginSuccessPacket(new UUID(1L, 1L),
+    loginSuccess = new FallbackPacketSnapshot(new LoginSuccessPacket(UUID.randomUUID(),
       Sonar.get().getConfig().getGeneralConfig().getString("verification.cached-username")));
 
     // Prepare JoinGame packet
     joinGame = new FallbackPacketSnapshot(new JoinGamePacket(PLAYER_ENTITY_ID,
       Sonar.get().getConfig().getVerification().getGamemode().getId(),
-      0, false, 0,
+      RANDOM.nextLong(), false, 0,
       true, false, false,
       new String[]{"minecraft:overworld"}, "minecraft:overworld"));
 
-    // Prepare cached motions for the gravity check
-    maxFallDistance = 0;
+    // Prepare the gravity check
     maxMovementTick = Sonar.get().getConfig().getVerification().getGravity().getMaxMovementTicks();
-    preparedCachedYMotions = new double[maxMovementTick + 8];
+    maxFallDistance = 1;
 
-    for (int i = 0; i < preparedCachedYMotions.length; i++) {
-      final double gravity = -((Math.pow(0.98, i) - 1) * 3.92);
-      preparedCachedYMotions[i] = gravity;
-      maxFallDistance += gravity;
+    double motionY = -0.08 * 0.98f;
+    for (int i = 0; i < maxMovementTick; i++) {
+      motionY = (motionY - 0.08) * 0.98f;
+      maxFallDistance += Math.abs(motionY);
     }
 
     // Set the dynamic block and collide Y position based on the maximum fall distance

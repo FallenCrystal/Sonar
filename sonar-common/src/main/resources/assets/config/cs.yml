@@ -10,7 +10,8 @@
 #
 # Potřebujete pomoc nebo máte otázky? https://jonesdev.xyz/discord
 # Zdrojový kód: https://github.com/jonesdevelopment/sonar
-# Copyright Jones Development a Sonar Contributors, licencováno pod GPL-3.0
+# Dokumentace: https://docs.jonesdev.xyz/administration/configuring-sonar
+# Copyright Jones Development and Sonar Contributors, licencováno pod GPL-3.0
 #
 
 # Obecné nastavení pro Sonar
@@ -139,9 +140,6 @@ verification:
     valid-name-regex: ^[a-zA-Z0-9_]+$
     # Regex pro validaci "client locale" při verifikaci
     valid-locale-regex: ^[a-zA-Z_]+$
-    # Maximální odezva hráče aby byl odpojen
-    # (Hodnota udávaná v milisekundách: 1 sekunda = 1000 milisekund)
-    max-ping: 10000
     # Maximální počet login packetů, který musí hřáč poslat aby byl vyhozen
     max-login-packets: 256
 
@@ -155,6 +153,9 @@ verification:
     # Kromě toho možná budete chtít snížit množství omezení rychlosti přihlášení
     # provádí Velocity nebo jiné proxy/pluginy, protože to může zabránit
     # hráči správné přenesení.
+    # Pokud váš server umožňuje hráčům Bedrocku připojit se přes Geyser, nezapomeňte nastavit.
+    # TransferTool pro Geyser, aby byli hráči Bedrocku přesměrováni na správný server.
+    # https://github.com/onebeastchris/TransferTool
     enabled: false
     # Na který server by měl Sonar přenést hráče, když projde ověřením?
     # Zadejte IP serveru, který hráči používají k běžnému připojení k vašemu serveru.

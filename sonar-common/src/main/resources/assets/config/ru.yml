@@ -10,7 +10,8 @@
 #
 # Нужна помощь или есть вопросы? https://jonesdev.xyz/discord
 # Исходный код: https://github.com/jonesdevelopment/sonar
-# Copyright Jones Development and Sonar Contributors, licensed under GPL-3.0
+# Документация: https://docs.jonesdev.xyz/administration/configuring-sonar
+# Copyright Jones Development and Sonar Contributors, под лицензией GPL-3.0
 #
 
 # Основные настройки
@@ -137,9 +138,6 @@ verification:
     valid-name-regex: ^[a-zA-Z0-9_]+$
     # Regex для проверки локализации клиента при верификации
     valid-locale-regex: ^[a-zA-Z_]+$
-    # Пинг который должен быть у игрока чтобы не пройти проверку
-    # (Это значение представляет собой время в миллисекундах: 1 секунда = 1000 миллисекунд)
-    max-ping: 10000
     # Максимальное количество пакетов для входа на сервер, которое игрок должен отправить, чтобы быть выгнанным
     max-login-packets: 256
 
@@ -153,6 +151,9 @@ verification:
     # Кроме того, вы можете пожелать снизить количество ограничений на скорость входа
     # выполняемых Velocity или другими прокси/плагинами, так как это может помешать
     # корректному перемещению игрока.
+    # Если ваш сервер позволяет игрокам Bedrock присоединяться через Geyser, убедитесь, что вы настроили
+    # TransferTool для Geyser, чтобы игроки Bedrock перенаправлялись на правильный сервер.
+    # https://github.com/onebeastchris/TransferTool
     enabled: false
     # На какой сервер должен Sonar переместить игрока после прохождения проверки?
     # Введите IP-адрес сервера, который обычно используется игроками для подключения к вашему серверу.

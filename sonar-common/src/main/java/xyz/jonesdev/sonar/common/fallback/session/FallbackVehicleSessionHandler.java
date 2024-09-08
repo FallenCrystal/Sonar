@@ -148,12 +148,18 @@ public final class FallbackVehicleSessionHandler extends FallbackSessionHandler 
       // Don't ask me why; Microsoft is doing some *fascinating* things with Bedrock...
       if (user.isGeyser()) {
         handleRotation();
+      } else {
+        checkState(rotationPackets >= inputPackets,
+          "illegal packet order; r/i " + rotationPackets + "/" + inputPackets);
       }
 
       // 1.8 and below do not have PaddleBoat packets,
       // so we simply exempt them from the PaddleBoat check.
       if (user.getProtocolVersion().compareTo(MINECRAFT_1_9) < 0) {
         paddlePackets++;
+      } else {
+        checkState(paddlePackets >= inputPackets,
+          "illegal packet order; i/p " + inputPackets + "/" + paddlePackets);
       }
       inputPackets++;
     }

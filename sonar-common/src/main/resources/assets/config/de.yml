@@ -10,7 +10,8 @@
 #
 # Brauchst du Hilfe? https://jonesdev.xyz/discord
 # Source code: https://github.com/jonesdevelopment/sonar
-# Copyright Jones Development and Sonar Contributors, licensed under GPL-3.0
+# Dokumentation: https://docs.jonesdev.xyz/administration/configuring-sonar
+# Copyright Jones Development and Sonar Contributors, lizenziert unter GPL-3.0
 #
 
 # Generelle Einstellungen für Sonar
@@ -136,9 +137,6 @@ verification:
     valid-name-regex: ^[a-zA-Z0-9_]+$
     # Regex zur Validierung der Client-Spracheinstellung während der Überprüfung
     valid-locale-regex: ^[a-zA-Z_]+$
-    # Ping, den ein Spieler haben muss, um ein Timeout zu erleiden
-    # (Dieser Wert stellt die Zeit in Millisekunden dar: 1 Sekunde = 1000 Millisekunden)
-    max-ping: 10000
     # Maximale Anzahl an Login-Paketen, die der Spieler senden muss, um gekickt zu werden
     max-login-packets: 256
 
@@ -152,6 +150,9 @@ verification:
     # Darüber hinaus möchten Sie möglicherweise die Begrenzung der Anmelderate reduzieren
     # wird von Velocity oder anderen Proxys/Plugins durchgeführt, da dies das verhindern könnte
     # Spieler konnte nicht korrekt übertragen werden.
+    # Wenn Ihr Server es erlaubt, dass Bedrock-Spieler über Geyser beitreten können, stellen Sie sicher, dass Sie das
+    # TransferTool für Geyser einrichten, damit Bedrock-Spieler auf den richtigen Server umgeleitet werden.
+    # https://github.com/onebeastchris/TransferTool
     enabled: false
     # Auf welchen Server soll Sonar den Spieler übertragen, wenn die Verifizierung bestanden wurde?
     # Bitte geben Sie die Server-IP ein, die von Spielern verwendet wird, um sich zu verbinden.

@@ -10,6 +10,7 @@
 #
 # დახმარება გჭირდება ან კითხვა გაქვს? https://jonesdev.xyz/discord
 # საწყისი კოდი: https://github.com/jonesdevelopment/sonar
+# Documentation: https://docs.jonesdev.xyz/administration/configuring-sonar
 # Copyright Jones Development and Sonar Contributors, licensed under GPL-3.0
 #
 
@@ -138,9 +139,6 @@ verification:
     valid-name-regex: ^[a-zA-Z0-9_]+$
     # Regex-ი კლიენტის ადგილის დასადასტურებლად ვერიფიკაციის დროს
     valid-locale-regex: ^[a-zA-Z_]+$
-    # პინგი რამდენიც უნდა ქონდეს მოთამაშეს იმისთვის, რომ დროებით დაიბლოკოს (გავარდეს)
-    # (ეს არის ნაჩვენები მილიწამებში: 1 წამი = 1000 მილიწამი)
-    max-ping: 10000
     # მაქსიმალური რაოდენობა შესვლის (LOGIN) პაკეტების, რომელიც მოთამაშემ უნდა გააგზავნოს სანამ გავარდება სერვერიდან
     max-login-packets: 256
 
@@ -153,6 +151,9 @@ verification:
     # დამატებით, შეიძლება გინდოდეთ შეამციროთ შესვლის სიხშირის ლიმიტი
     # რომელსაც ახორციელებს Velocity ან სხვა პროქსიები/პლაგინები, რადგან ეს შეიძლება ხელს უშლიდეს
     # მოთამაშის სწორად გადაყვანას
+    # If your server allows Bedrock players to join via Geyser, make sure to set up
+    # TransferTool for Geyser, so Bedrock players are redirected to the correct server.
+    # https://github.com/onebeastchris/TransferTool
     enabled: false
     # რომელ სერვერზე უნდა გადაიყვანოს Sonar-მა მოთამაშე ვერიფიკაციის გავლის შემდეგ?
     # გთხოვთ, შეიყვანოთ სერვერის IP მისამართი, რომლითაც მოთამაშეები ჩვეულებრივ უერთდებიან თქვენს სერვერს

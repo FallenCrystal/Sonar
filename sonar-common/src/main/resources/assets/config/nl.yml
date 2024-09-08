@@ -10,7 +10,8 @@
 #
 # Hulp nodig of vragen? https://jonesdev.xyz/discord
 # Broncode: https://github.com/jonesdevelopment/sonar
-# Copyright Jones Development and Sonar Contributors, licensed under GPL-3.0
+# Documentatie: https://docs.jonesdev.xyz/administration/configuring-sonar
+# Copyright Jones Development and Sonar Contributors, gelicentieerd onder GPL-3.0
 #
 
 # Algemene instellingen voor Sonar
@@ -138,9 +139,6 @@ verification:
     valid-name-regex: ^[a-zA-Z0-9_]+$
     # Regex voor het valideren van de landinstelling van de client tijdens verificatie
     valid-locale-regex: ^[a-zA-Z_]+$
-    # Ping moet een speler hebben om een time-out te krijgen
-    # (Deze waarde vertegenwoordigt de tijd in milliseconden: 1 seconde = 1000 milliseconden)
-    max-ping: 10000
     # Maximaal aantal loginpakketten dat de speler moet verzenden om te worden geschopt
     max-login-packets: 256
 
@@ -154,6 +152,9 @@ verification:
     # Bovendien wilt u mogelijk de beperking van de inlegsnelheid verminderen
     # uitgevoerd door Velocity van andere proxy's/plugins, omdat dit de
     # speler wordt niet correct weergegeven.
+    # Als je server toestaat dat Bedrock spelers meedoen via Geyser, zorg er dan voor dat je
+    # TransferTool voor Geyser, zodat Bedrock spelers worden doorgestuurd naar de juiste server.
+    # https://github.com/onebeastchris/TransferTool
     enabled: false
     # Naar welke server moet Sonar de speler overbrengen wanneer de verificatie is geslaagd?
     # Voer het server-IP in dat door spelers wordt gebruikt om normaal verbinding te maken met uw server.
