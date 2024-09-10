@@ -84,21 +84,21 @@ public class FallbackPreparer {
   public FallbackPacket tooManyOnlinePerIP;
 
   // Vehicle
-  public FallbackPacket removeBoatEntities;
-  public FallbackPacket removeMinecartEntities;
-  public FallbackPacket spawnBoatEntity;
-  public FallbackPacket spawnMinecartEntity;
-  public FallbackPacket setBoatPassengers;
-  public FallbackPacket setMinecartPassengers;
+  public static FallbackPacket removeBoatEntities;
+  public static FallbackPacket removeMinecartEntities;
+  public static FallbackPacket spawnBoatEntity;
+  public static FallbackPacket spawnMinecartEntity;
+  public static FallbackPacket setBoatPassengers;
+  public static FallbackPacket setMinecartPassengers;
   public final int VEHICLE_BOAT_ENTITY_ID = PLAYER_ENTITY_ID + 1 + RANDOM.nextInt(10);
   public final int VEHICLE_MINECART_ENTITY_ID = VEHICLE_BOAT_ENTITY_ID + 1 + RANDOM.nextInt(10);
 
   // Collisions
   public final int BLOCKS_PER_ROW = 8; // 8 * 8 = 64 (protocol maximum)
-  public final int SPAWN_X_POSITION = 16 / 2; // middle of the chunk
-  public final int SPAWN_Z_POSITION = 16 / 2; // middle of the chunk
+  public static final int SPAWN_X_POSITION = 16 / 2; // middle of the chunk
+  public static final int SPAWN_Z_POSITION = 16 / 2; // middle of the chunk
   public final int DEFAULT_Y_COLLIDE_POSITION = 155 + RANDOM.nextInt(101); // 255 is the maximum Y position
-  public final int IN_AIR_Y_POSITION = 1337;
+  public static final int IN_AIR_Y_POSITION = 1337;
 
   // CAPTCHA position
   public final FallbackPacket CAPTCHA_POSITION = new FallbackPacketSnapshot(new SetPlayerPositionRotationPacket(
