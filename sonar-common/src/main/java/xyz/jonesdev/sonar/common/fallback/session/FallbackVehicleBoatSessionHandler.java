@@ -159,12 +159,12 @@ public final class FallbackVehicleBoatSessionHandler extends FallbackVehicleSess
       handleRotation(null);
     } else {
       checkState(inputPackets + 1 == rotationPackets,
-        "illegal packet order; i/r" + inputPackets + "/" + rotationPackets);
+        "illegal packet order; i/r " + inputPackets + "/" + rotationPackets);
     }
     checkState(exemptPaddleBoat || inputPackets + 1 == paddlePackets,
-      "illegal packet order; i/p" + inputPackets + "/" + paddlePackets);
+      "illegal packet order; i/p " + inputPackets + "/" + paddlePackets);
     checkState(exemptPaddleBoat || inputPackets == vehicleMovePackets,
-      "illegal packet order; i/v" + inputPackets + "/" + vehicleMovePackets);
+      "illegal packet order; i/v " + inputPackets + "/" + vehicleMovePackets);
   }
 
   @Override

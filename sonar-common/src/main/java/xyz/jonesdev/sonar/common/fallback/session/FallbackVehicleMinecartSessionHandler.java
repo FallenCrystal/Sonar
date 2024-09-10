@@ -67,7 +67,7 @@ public final class FallbackVehicleMinecartSessionHandler extends FallbackVehicle
     if (!isPreExceptMovement() || !isExpectMovement()) {
       // Check packet order first
       checkState(rotationPackets == inputPackets,
-        "illegal packet order; r/i" + rotationPackets + "/" + inputPackets);
+        "illegal packet order; r/i " + rotationPackets + "/" + inputPackets);
 
       // Once the player sent enough packets, go to the next stage
       final int minimumPackets = Sonar.get().getConfig().getVerification().getVehicle().getMinimumPackets();
