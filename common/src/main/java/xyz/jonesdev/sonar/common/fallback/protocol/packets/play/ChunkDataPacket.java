@@ -18,10 +18,7 @@
 package xyz.jonesdev.sonar.common.fallback.protocol.packets.play;
 
 import io.netty.buffer.ByteBuf;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.LongArrayBinaryTag;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +32,11 @@ import xyz.jonesdev.sonar.common.util.ProtocolUtil;
 @AllArgsConstructor
 public final class ChunkDataPacket implements FallbackPacket {
   private int sectionX, sectionZ;
+  private int totalHeight; // For 1.18+ world
+
+  public ChunkDataPacket(final int sectionX, final int sectionZ) {
+    this(sectionX, sectionZ, 380);
+  }
 
   @Override
   public void encode(final @NotNull ByteBuf byteBuf, final @NotNull ProtocolVersion protocolVersion) throws Exception {
@@ -60,6 +62,7 @@ public final class ChunkDataPacket implements FallbackPacket {
     }
 
     if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_14)) {
+      // Height map
       final long[] motionBlockingData = new long[protocolVersion.lessThan(ProtocolVersion.MINECRAFT_1_18) ? 36 : 37];
       final CompoundBinaryTag motionBlockingTag = CompoundBinaryTag.builder()
         .put("MOTION_BLOCKING", LongArrayBinaryTag.longArrayBinaryTag(motionBlockingData))
@@ -95,8 +98,19 @@ public final class ChunkDataPacket implements FallbackPacket {
     } else if (protocolVersion.lessThan(ProtocolVersion.MINECRAFT_1_18)) {
       ProtocolUtil.writeVarInt(byteBuf, 0);
     } else {
-      final byte[] sectionData = new byte[]{0, 0, 0, 0, 0, 0, 1, 0};
-      int count = 24;
+      // Let's get to know the decoding of PalettedContainer first:
+      // bits (byte) -  It will decide what Palette is assigned. 0 is always SINGULAR (Only accept 1 value).
+      // Each different Palette provider will assign a different Palette based on the bits.
+      // (See PalettedContainer.PaletteProvider)
+      // entry - Palette#readPacket(ByteBuf). SingularPalette read 1 varint for value.
+      // longArray - Bytes to PaletteStorage. Put 0 (varint) for empty long array.
+      final byte[] sectionData = new byte[]{
+        0, 0, // nonEmptyBlockCount. short occupies 2 bytes.
+        0, 0, 0, // blockStateContainer. 0 is air – everything is air.
+        0, 1, 0 // biomeContainer. 1 is biome value that id in registry.
+      };
+      // We can ignore the decimal of the result and add 1 if it is not divisible by 16.
+      int count = (totalHeight + 15) / 16;
       ProtocolUtil.writeVarInt(byteBuf, sectionData.length * count);
 
       for (int i = 0; i < count; i++) {
@@ -118,6 +132,10 @@ public final class ChunkDataPacket implements FallbackPacket {
       byteBuf.ensureWritable(lightData.length);
 
       if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_20)) {
+        // bitSet is actually read from long array
+        // 0, 0, 0: initedSky, initedBlock, uninitedSky (empty array)
+        // 1, 0, 0, 0, 0, 0, 3, -1, -1: unititedBlock (1 size long array)
+        // 0, 0: skyNibbles, blockNibbles (empty List<byte[]>)
         byteBuf.writeBytes(lightData, 1, lightData.length - 1);
       } else {
         byteBuf.writeBytes(lightData);
