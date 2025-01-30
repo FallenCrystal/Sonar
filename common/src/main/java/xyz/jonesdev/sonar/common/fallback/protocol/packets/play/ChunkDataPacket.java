@@ -135,7 +135,7 @@ public final class ChunkDataPacket implements FallbackPacket {
         // bitSet is actually read from long array
         // 0, 0, 0: initedSky, initedBlock, uninitedSky (empty array)
         // 1, 0, 0, 0, 0, 0, 3, -1, -1: unititedBlock (1 size long array)
-        // 0, 0: skyNibbles, blockNibbles (empty List<byte[]>)
+        // 0, 0: skyNibbles, blockNibbles (empty List<long[]>)
         byteBuf.writeBytes(lightData, 1, lightData.length - 1);
       } else {
         byteBuf.writeBytes(lightData);
