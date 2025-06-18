@@ -80,11 +80,11 @@ public final class FallbackPreJoinHandler extends FallbackVerificationHandler {
         } else {
           markAcknowledged();
         }
-      }
 
-      // 1.8 clients send KeepAlive packets with the ID 0 every second
-      // while the player is in the "Downloading terrain" screen.
-      expectedKeepAliveId = 0;
+        // Disable the check for any further packets the client might send
+        // while loading the world (or similar).
+        expectedKeepAliveId = 0;
+      }
     } else if (packet instanceof LoginAcknowledgedPacket) {
       // Prevent users from sending multiple LoginAcknowledged packets
       checkState(!acknowledgedLogin, "sent duplicate login ack");
@@ -113,6 +113,7 @@ public final class FallbackPreJoinHandler extends FallbackVerificationHandler {
     } else if (packet instanceof PluginMessagePacket) {
       final PluginMessagePacket pluginMessage = (PluginMessagePacket) packet;
 
+      // TODO: Resolve as namespace (?)
       final boolean usingModernChannel = pluginMessage.getChannel().equals("minecraft:brand");
       final boolean usingLegacyChannel = pluginMessage.getChannel().equals("MC|Brand");
 
@@ -121,17 +122,11 @@ public final class FallbackPreJoinHandler extends FallbackVerificationHandler {
         return;
       }
 
-      // Make sure the player isn't sending the client brand multiple times
-      checkState(!receivedClientBrand, "sent duplicate plugin message");
-      // Check if the channel is correct - 1.13 uses the new namespace
-      // system ('minecraft:' + channel) and anything below 1.13 uses
-      // the legacy namespace system ('MC|' + channel).
-      checkState(usingLegacyChannel
-          || user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_13),
-        "illegal PluginMessage channel: " + pluginMessage.getChannel());
-
       // Validate the client branding using a regex to filter unwanted characters.
       if (Sonar.get0().getConfig().getVerification().getBrand().isEnabled()) {
+        // Make sure the player isn't sending the client brand multiple times
+        checkState(!receivedClientBrand, "sent duplicate client brand");
+
         validateClientBrand(pluginMessage.getData());
       }
 
@@ -166,7 +161,7 @@ public final class FallbackPreJoinHandler extends FallbackVerificationHandler {
 
   void validateClientInformation() {
     checkState(receivedClientInfo, "didn't send client settings");
-    checkState(receivedClientBrand, "didn't send plugin message");
+    checkState(receivedClientBrand, "didn't send client brand");
   }
 
   private void updateEncoderDecoderState(final @NotNull FallbackPacketRegistry registry) {
@@ -184,11 +179,9 @@ public final class FallbackPreJoinHandler extends FallbackVerificationHandler {
     // https://discord.com/channels/923308209769426994/1116066363887321199/1256929441053933608
     String brand = new String(data, StandardCharsets.UTF_8);
     // Remove the invalid character at the beginning of the client brand
-    if (user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_8)) {
+    if (user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_8) && brand.length() > 1) {
       brand = brand.substring(1);
     }
-    // Check for illegal client brands
-    checkState(!brand.equals("Vanilla"), "illegal client brand: " + brand);
     // Regex pattern for validating client brands
     final Pattern pattern = Sonar.get0().getConfig().getVerification().getBrand().getValidRegex();
     checkState(pattern.matcher(brand).matches(), "client brand does not match pattern: " + brand);
