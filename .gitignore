@@ -32,3 +32,5 @@ gradlew*
 *.log
 *.svg
 *.txt
+
+.generated/
