@@ -148,8 +148,14 @@ public final class JoinGamePacket implements SonarPacket {
 
       ProtocolUtil.writeString(byteBuf, levelName);
       byteBuf.writeLong(partialHashedSeed);
-      byteBuf.writeByte(gamemode);
-      byteBuf.writeByte(previousGamemode);
+      if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+        ProtocolUtil.writeVarInt(byteBuf, gamemode);
+        // ByteBufCodecs#OPTIONAL_VAR_INT: 0 for empty, (value + 1) if present
+        ProtocolUtil.writeVarInt(byteBuf, previousGamemode == -1 ? 0 : previousGamemode + 1);
+      } else {
+        byteBuf.writeByte(gamemode);
+        byteBuf.writeByte(previousGamemode);
+      }
     }
 
     if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_16)) {
