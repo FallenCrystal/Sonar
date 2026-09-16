@@ -50,7 +50,7 @@ public final class RegistryDataPacket implements SonarPacket {
       for (final RegistryDataPacket.Bundle bundle : bundles) {
         ProtocolUtil.writeString(byteBuf, bundle.getName());
         // Write the bundle tag
-        final CompoundBinaryTag tag = bundle.getTag();
+        final BinaryTag tag = bundle.getTag();
         if (tag != null) {
           byteBuf.writeBoolean(true);
           ProtocolUtil.writeBinaryTag(byteBuf, protocolVersion, tag);
@@ -73,8 +73,7 @@ public final class RegistryDataPacket implements SonarPacket {
       final ArrayList<RegistryDataPacket.Bundle> bundles = new ArrayList<>();
       for (final BinaryTag binaryTag : rootTag.getCompound(type).getList("value")) {
         final CompoundBinaryTag tag = (CompoundBinaryTag) binaryTag;
-        // CompoundBinaryTag#getCompound(String) will return an empty compound tag when not exist.
-        bundles.add(new Bundle(tag.getString("name"), tag.get("element") == null ? null : tag.getCompound("element")));
+        bundles.add(new Bundle(tag.getString("name"), tag.get("element")));
       }
       packets[index++] = new SonarPacketSnapshot(new RegistryDataPacket(rootTag, type, bundles));
     }
@@ -86,6 +85,6 @@ public final class RegistryDataPacket implements SonarPacket {
   public static class Bundle {
     @NotNull String name;
     // In the protocol, it is able to be null
-    @Nullable CompoundBinaryTag tag;
+    @Nullable BinaryTag tag;
   }
 }
