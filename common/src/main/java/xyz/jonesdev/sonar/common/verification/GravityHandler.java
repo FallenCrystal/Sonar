@@ -36,8 +36,8 @@ public final class GravityHandler extends VerificationHandler {
     super(user);
 
     this.preJoinHandler = preJoinHandler;
-    // Bedrock users start falling immediately
-    this.canFall = user.isGeyser();
+    // Bedrock users and 26.3+ clients start falling immediately
+    this.canFall = user.isGeyser() || user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3);
     // We don't want to check Geyser players for valid gravity, as this might cause issues because of the protocol
     this.enableGravityCheck = !user.isGeyser() && AntiBot.shouldPerform(
       Sonar.get0().getConfig().getVerification().getGravity().getTiming());
@@ -108,6 +108,8 @@ public final class GravityHandler extends VerificationHandler {
       final SetPlayerPositionRotationPacket position = (SetPlayerPositionRotationPacket) packet;
       if (teleported) {
         handleMovement(position.getX(), position.getY(), position.getZ(), position.isOnGround(), true);
+      } else if (user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+        return;
       } else if (user.getProtocolVersion().equals(ProtocolVersion.MINECRAFT_1_21_2)) {
         lastPositionPacket = position;
         return;
@@ -122,6 +124,8 @@ public final class GravityHandler extends VerificationHandler {
       if (teleported) {
         final SetPlayerPositionPacket position = (SetPlayerPositionPacket) packet;
         handleMovement(position.getX(), position.getY(), position.getZ(), position.isOnGround(), false);
+      } else if (user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+        return;
       }
       checkClientTick();
     } else if (packet instanceof ConfirmTeleportationPacket) {
@@ -133,11 +137,15 @@ public final class GravityHandler extends VerificationHandler {
       checkState(confirmTeleport.getTeleportId() == expectedTeleportId,
         "expected TP ID " + expectedTeleportId + ", but got " + confirmTeleport.getTeleportId());
 
+      final boolean v26_3 = user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3);
       final boolean sendPosRotBefore = user.getProtocolVersion().equals(ProtocolVersion.MINECRAFT_1_21_2);
-      checkState(sendPosRotBefore ? lastPositionPacket != null : !expectTeleportPosRot,
-        "expected position rotation but got teleport confirm.");
-      if (!sendPosRotBefore) {
-        expectTeleportPosRot = true;
+
+      if (!v26_3) {
+        checkState(sendPosRotBefore ? lastPositionPacket != null : !expectTeleportPosRot,
+          "expected position rotation but got teleport confirm.");
+        if (!sendPosRotBefore) {
+          expectTeleportPosRot = true;
+        }
       }
 
       // The first teleport ID is not useful for us in this context, skip it
@@ -147,7 +155,11 @@ public final class GravityHandler extends VerificationHandler {
         // Enable the movement checks
         teleported = true;
 
-        if (sendPosRotBefore) {
+        if (v26_3) {
+          handleMovement(
+            confirmTeleport.getX(), confirmTeleport.getY(), confirmTeleport.getZ(),
+            false, true);
+        } else if (sendPosRotBefore) {
           handleMovement(
             lastPositionPacket.getX(), lastPositionPacket.getY(), lastPositionPacket.getZ(),
             lastPositionPacket.isOnGround(), true);
@@ -248,7 +260,8 @@ public final class GravityHandler extends VerificationHandler {
       // The deltaY is 0 whenever the player sends their first position packet.
       // We have to account for this or the player will falsely fail the verification.
       if (deltaY == 0) {
-        checkState(rotated, "illegal movement packet order: " + deltaY);
+        checkState(user.getProtocolVersion().greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3) || rotated,
+          "illegal movement packet order: " + deltaY);
         checkState(movementTick == 0, "illegal y motion: " + movementTick);
         // 1.7 clients immediately start falling after this packet
         if (user.getProtocolVersion().lessThan(ProtocolVersion.MINECRAFT_1_8)) {
