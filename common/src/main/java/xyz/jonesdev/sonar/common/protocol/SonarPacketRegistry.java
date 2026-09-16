@@ -457,8 +457,7 @@ public enum SonarPacketRegistry {
         map(0x03, MINECRAFT_1_19, true),
         map(0x04, MINECRAFT_1_19_4, true),
         map(0x03, MINECRAFT_1_20_2, true),
-        map(0x02, MINECRAFT_1_21_5, true),
-        map(0x7B, MINECRAFT_26_3, true));
+        map(0x02, MINECRAFT_1_21_5, true));
       // minecraft:set_time
       clientbound.register(UpdateTimePacket.class, UpdateTimePacket::new,
         map(0x03, MINECRAFT_1_7_2, true),
