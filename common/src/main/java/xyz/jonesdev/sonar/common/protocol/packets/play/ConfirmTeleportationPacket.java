@@ -32,6 +32,15 @@ import xyz.jonesdev.sonar.common.util.ProtocolUtil;
 @AllArgsConstructor
 public final class ConfirmTeleportationPacket implements SonarPacket {
   private int teleportId;
+  private double x;
+  private double y;
+  private double z;
+  private float yaw;
+  private float pitch;
+
+  public ConfirmTeleportationPacket(final int teleportId) {
+    this.teleportId = teleportId;
+  }
 
   @Override
   public void encode(final ByteBuf byteBuf, final ProtocolVersion protocolVersion) {
@@ -41,5 +50,12 @@ public final class ConfirmTeleportationPacket implements SonarPacket {
   @Override
   public void decode(final ByteBuf byteBuf, final ProtocolVersion protocolVersion) throws Exception {
     teleportId = ProtocolUtil.readVarInt(byteBuf);
+    if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+      x = byteBuf.readDouble();
+      y = byteBuf.readDouble();
+      z = byteBuf.readDouble();
+      yaw = byteBuf.readFloat();
+      pitch = byteBuf.readFloat();
+    }
   }
 }

@@ -46,6 +46,8 @@ public final class AnimationPacket implements SonarPacket {
     if (protocolVersion.lessThan(ProtocolVersion.MINECRAFT_1_8)) {
       entityId = byteBuf.readInt();
       type = LegacyAnimationType.getById(byteBuf.readByte());
+    } else if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+      hand = MAIN_HAND;
     } else if (protocolVersion.greaterThan(ProtocolVersion.MINECRAFT_1_8)) {
       // Only 1.9+ clients have an offhand
       hand = ProtocolUtil.readVarInt(byteBuf);

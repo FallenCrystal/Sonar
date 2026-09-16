@@ -37,6 +37,12 @@ public final class EntityAnimationPacket implements SonarPacket {
   @Override
   public void encode(final ByteBuf byteBuf, final ProtocolVersion protocolVersion) throws Exception {
     ProtocolUtil.writeVarInt(byteBuf, entityId);
+    if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_3)) {
+      ProtocolUtil.writeVarInt(byteBuf, type == Type.SWING_OFF_HAND ? 1 : 0);
+      ProtocolUtil.writeVarInt(byteBuf, 1); // WHACK
+      ProtocolUtil.writeVarInt(byteBuf, 6); // duration
+      return;
+    }
     byteBuf.writeByte(type.ordinal());
   }
 

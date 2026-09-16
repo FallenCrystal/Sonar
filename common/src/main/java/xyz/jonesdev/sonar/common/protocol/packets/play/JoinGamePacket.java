@@ -169,12 +169,11 @@ public final class JoinGamePacket implements SonarPacket {
       ProtocolUtil.writeVarInt(byteBuf, seaLevel);
     }
 
-    if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_20_5)) {
-      byteBuf.writeBoolean(secureProfile);
-    }
-
     if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_26_2)) {
       byteBuf.writeBoolean(onlineMode);
+      byteBuf.writeBoolean(secureProfile);
+    } else if (protocolVersion.greaterThanOrEquals(ProtocolVersion.MINECRAFT_1_20_5)) {
+      byteBuf.writeBoolean(secureProfile);
     }
   }
 
